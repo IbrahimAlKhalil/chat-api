@@ -2,6 +2,8 @@
 
 ## Installation
 
+Note: You need docker to be installed in your system in order to run this application
+
 ```bash
 $ pnpm install
 ```
