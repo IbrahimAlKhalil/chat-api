@@ -35,6 +35,7 @@ model conversations {
 model members {
   conversation_id Int
   user_id         Int
+  last_read       DateTime @db.Timestamptz()
 
   conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
@@ -42,10 +43,11 @@ model members {
 }
 
 model messages {
-  id              Int     @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   conversation_id Int
   member_id       Int
   text            String?
+  created_at      DateTime @db.Timestamptz()
 
   conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   attachments  attachments[]
