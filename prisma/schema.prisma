@@ -10,3 +10,68 @@ datasource db {
   provider = "postgresql"
   url      = env("POSTGRES_URL")
 }
+
+// -------------------- Enums ----------------------
+
+enum conversation_type {
+  dm
+  group
+}
+
+// ------------------------------------------------
+
+model conversations {
+  id   Int               @id @default(autoincrement())
+  type conversation_type
+
+  name String?
+
+  members  members[]
+  messages messages[]
+
+  @@index([name])
+}
+
+model members {
+  conversation_id Int
+  user_id         Int
+
+  conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([conversation_id, user_id])
+}
+
+model messages {
+  id              Int     @id @default(autoincrement())
+  conversation_id Int
+  member_id       Int
+  text            String?
+
+  conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  attachments  attachments[]
+
+  @@index([text])
+  @@index([conversation_id, member_id])
+}
+
+model mime_types {
+  mime       String @id
+  extenstion String @unique
+
+  attachments attachments[]
+}
+
+model attachments {
+  id Int @id @default(autoincrement())
+
+  message_id   Int
+  file_id      String
+  mime_type_id String
+
+  message   messages   @relation(fields: [message_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  mime_type mime_types @relation(fields: [mime_type_id], references: [mime], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([file_id])
+  @@index([message_id])
+  @@index([mime_type_id])
+}
