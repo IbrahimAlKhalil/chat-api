@@ -42,17 +42,25 @@ model members {
   @@id([conversation_id, user_id])
 }
 
+model message_types {
+  id Int @id @default(autoincrement())
+
+  name     String
+  messages messages[]
+}
+
 model messages {
   id              Int      @id @default(autoincrement())
   conversation_id Int
   member_id       Int
-  text            String?
+  message_type_id Int
+  metadata        Json     @db.JsonB
   created_at      DateTime @db.Timestamptz()
 
+  message_type message_types @relation(fields: [message_type_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   attachments  attachments[]
 
-  @@index([text])
   @@index([conversation_id, member_id])
 }
 
