@@ -65,7 +65,8 @@ model messages {
 }
 
 model mime_types {
-  mime       String @id
+  id         Int    @id @default(autoincrement())
+  mime_type  String @unique
   extenstion String @unique
 
   attachments attachments[]
@@ -76,10 +77,10 @@ model attachments {
 
   message_id   Int
   file_id      String
-  mime_type_id String
+  mime_type_id Int
 
   message   messages   @relation(fields: [message_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  mime_type mime_types @relation(fields: [mime_type_id], references: [mime], onDelete: Restrict, onUpdate: Cascade)
+  mime_type mime_types @relation(fields: [mime_type_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([file_id])
   @@index([message_id])
