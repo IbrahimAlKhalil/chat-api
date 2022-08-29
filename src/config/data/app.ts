@@ -6,6 +6,7 @@ export default function () {
     host: getEnv('HOST', '127.0.0.1'),
     port: getEnvNum('PORT', 7000),
     origin: getEnv('ORIGIN', 'localhost'),
+    authCheckURL: getEnv('AUTH_CHECK_URL'),
   };
 }
 
