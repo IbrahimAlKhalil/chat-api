@@ -23,9 +23,11 @@ const docker = new Docker(
 const prefix = 'cab';
 const images = {
   postgres: 'postgres:14.5-alpine3.16',
+  coturn: 'coturn/coturn:4.5-alpine',
 };
 const containerNames = {
   postgres: `${prefix}-postgres`,
+  coturn: `${prefix}-coturn`,
 };
 
 async function removeContainer(name) {
@@ -232,6 +234,56 @@ async function startPostgres() {
   console.log(chalk.greenBright.bold('Postgres started ✓'));
 }
 
+async function startCoturn() {
+  console.log(chalk.greenBright.bold('Starting Coturn...'));
+
+  console.log(chalk.whiteBright.bold('Creating container:'), chalk.cyan(containerNames.coturn));
+
+  const ports = [3478, 5349];
+
+  for (let port = 49160; port < 49201; port++) {
+    ports.push(port);
+  }
+
+  const portBindings = {};
+
+  for (const port of ports) {
+    portBindings[`${port}/tcp`] = [
+      {
+        HostIp: '127.0.0.1',
+        HostPort: `${port}/tcp`,
+      },
+    ]
+
+    portBindings[`${port}/udp`] = [
+      {
+        HostIp: '127.0.0.1',
+        HostPort: `${port}/udp`,
+      },
+    ]
+  }
+
+  const container = await docker.createContainer({
+    name: containerNames.coturn,
+    Image: images.coturn,
+    Cmd: ['turnserver', `--use-auth-secret=${process.env.SECRET}`],
+    Hostname: containerNames.coturn,
+    HostConfig: {
+      PortBindings: portBindings,
+      RestartPolicy: {
+        Name: 'on-failure',
+      },
+    },
+  });
+
+  await container.start();
+
+  // Log the container logs
+  logContainer(container, 'Coturn');
+
+  console.log(chalk.greenBright.bold('Coturn started ✓'));
+}
+
 async function startApp() {
   console.log(chalk.greenBright.bold('Starting Application...'));
 
@@ -253,6 +305,7 @@ async function startApp() {
 async function stop() {
   console.log(chalk.redBright.bold('Stopping...'));
   await removeContainer(containerNames.postgres);
+  await removeContainer(containerNames.coturn);
 
   console.log(chalk.redBright.bold('Stopped ✓'));
 }
@@ -275,7 +328,8 @@ process.on('uncaughtException', close);
 await pullImages().catch(console.error);
 await stop();
 
-await startPostgres();
-await startApp();
+await startPostgres().catch(console.error);
+await startCoturn().catch(console.error);
+await startApp().catch(console.error);
 
 console.log(chalk.greenBright.bold('All services started ✓'));
