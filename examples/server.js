@@ -35,8 +35,8 @@ Server.get('/*', (request, response) => {
   return response.type(file.extension).send(file.buffer);
 });
 
-Server.listen(Number(process.env.EXAMPLE_PORT), process.env.HOST).then(() => {
+Server.listen(Number(process.env.EXAMPLES_PORT), process.env.HOST).then(() => {
   console.log(
-    `Examples: http://${process.env.HOST}:${process.env.EXAMPLE_PORT}`,
+    `Examples: http://${process.env.HOST}:${process.env.EXAMPLES_PORT}`,
   );
 });
