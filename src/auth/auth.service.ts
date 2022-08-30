@@ -47,7 +47,7 @@ export class AuthService {
 
     const token = header.split(' ')[1];
 
-    if (token) {
+    if (!token) {
       throw new Unauthorized();
     }
 
