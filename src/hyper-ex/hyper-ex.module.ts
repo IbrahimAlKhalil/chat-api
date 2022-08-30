@@ -130,6 +130,7 @@ export class HyperExModule {
       upgrade: this.handleUpgrade.bind(this),
       message: this.handleMessage.bind(this),
       close: this.handleClose.bind(this),
+      open: this.handleOpen.bind(this),
     });
   }
 
@@ -165,8 +166,6 @@ export class HyperExModule {
         secWebSocketExtensions,
         context,
       );
-
-      this.onlineUsers.add(uid);
     } catch (e) {
       res
         .writeStatus('401')
@@ -262,5 +261,17 @@ export class HyperExModule {
 
   private async handleClose(ws: Websocket) {
     this.onlineUsers.delete(ws.uid);
+    this.hyperEx.uws_instance.publish(
+      '0',
+      JSON.stringify({ uid: ws.uid, type: 'out' }),
+    );
+  }
+
+  private async handleOpen(ws: Websocket) {
+    this.onlineUsers.add(ws.uid);
+    this.hyperEx.uws_instance.publish(
+      '0',
+      JSON.stringify({ uid: ws.uid, type: 'in' }),
+    );
   }
 }
