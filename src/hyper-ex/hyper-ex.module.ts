@@ -39,7 +39,7 @@ export class HyperExModule {
     this.initWs();
   }
 
-  public readonly onlineUsers = new Set<number>();
+  public readonly onlineUsers: Record<number, number> = {};
   private readonly logger = new Logger(HyperExModule.name);
   private readonly messageSchema = Joi.array().items(
     Joi.string().valid('join', 'leave'),
@@ -107,7 +107,7 @@ export class HyperExModule {
     this.hyperEx.get('/online-users', async (req, res) => {
       await this.authService.authenticateReq(req);
 
-      res.json(Array.from(this.onlineUsers));
+      res.json(Object.keys(this.onlineUsers).map((id) => Number(id)));
     });
 
     this.hyperEx.listen(this.config.app.port, this.config.app.host).then(() => {
@@ -260,18 +260,30 @@ export class HyperExModule {
   }
 
   private async handleClose(ws: Websocket) {
-    this.onlineUsers.delete(ws.uid);
-    this.hyperEx.uws_instance.publish(
-      '0',
-      JSON.stringify([0, { uid: ws.uid, type: 'out' }]),
-    );
+    const count = --this.onlineUsers[ws.uid];
+
+    if (count <= 0) {
+      delete this.onlineUsers[ws.uid];
+
+      this.hyperEx.uws_instance.publish(
+        '0',
+        JSON.stringify([0, { uid: ws.uid, type: 'out' }]),
+      );
+    }
   }
 
   private async handleOpen(ws: Websocket) {
-    this.onlineUsers.add(ws.uid);
-    this.hyperEx.uws_instance.publish(
-      '0',
-      JSON.stringify([0, { uid: ws.uid, type: 'in' }]),
-    );
+    if (typeof this.onlineUsers[ws.uid] !== 'number') {
+      this.onlineUsers[ws.uid] = 0;
+    }
+
+    const count = ++this.onlineUsers[ws.uid];
+
+    if (count === 1) {
+      this.hyperEx.uws_instance.publish(
+        '0',
+        JSON.stringify([0, { uid: ws.uid, type: 'in' }]),
+      );
+    }
   }
 }
