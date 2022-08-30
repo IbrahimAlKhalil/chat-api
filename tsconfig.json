@@ -24,6 +24,7 @@
   "exclude": [
     "node_modules",
     "prisma",
-    "temp"
+    "temp",
+    "examples"
   ]
 }

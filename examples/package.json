@@ -1,0 +1,17 @@
+{
+  "name": "chat-application-examples",
+  "version": "0.0.0",
+  "author": "Rixo Tech",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ./server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "hyper-express": "^6.4.5",
+    "live-directory": "^2.3.2"
+  }
+}
