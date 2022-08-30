@@ -125,6 +125,7 @@ export class HyperExModule {
       compression: HyperExpress.compressors.SHARED_COMPRESSOR,
       maxPayloadLength: websocket.maxPayloadLength,
       idleTimeout: websocket.idleTimeout,
+      sendPingsAutomatically: true,
       maxBackpressure: websocket.maxBackpressure,
       upgrade: this.handleUpgrade.bind(this),
       message: this.handleMessage.bind(this),
