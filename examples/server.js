@@ -1,3 +1,4 @@
+import users from './users.json' assert { type: 'json' };
 import LiveDirectory from 'live-directory';
 import HyperExpress from 'hyper-express';
 import dotenv from 'dotenv';
@@ -20,6 +21,23 @@ const LiveAssets = new LiveDirectory({
   ignore: (path) => {
     return path.startsWith('.');
   },
+});
+
+Server.get('/users', (req, res) => {
+  res.status(200).json(users);
+});
+
+Server.get('/me', (req, res) => {
+  const header = req.header('authorization');
+  const token = header.replace('Bearer ', '');
+
+  const user = users.find(user => user.token === token);
+
+  if (user) {
+    return res.status(200).json(user);
+  }
+
+  return res.status(401).json(`You are not authorized to make this request`);
 });
 
 // Create static serve route to serve frontend assets
