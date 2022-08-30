@@ -16,7 +16,7 @@ export class AuthService {
   async authenticate(token: string): Promise<number> {
     try {
       const res = await got
-        .get(`${this.config.app.authCheckURL}`, {
+        .get(`${this.config.app.authHook}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
