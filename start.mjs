@@ -23,10 +23,12 @@ const docker = new Docker(
 const prefix = 'cab';
 const images = {
   postgres: 'postgres:14.5-alpine3.16',
+  minio: 'minio/minio:RELEASE.2022-08-26T19-53-15Z',
   coturn: 'coturn/coturn:4.5-alpine',
 };
 const containerNames = {
   postgres: `${prefix}-postgres`,
+  minio: `${prefix}-minio`,
   coturn: `${prefix}-coturn`,
 };
 
@@ -284,6 +286,85 @@ async function startCoturn() {
   console.log(chalk.greenBright.bold('Coturn started ✓'));
 }
 
+async function startMinio() {
+  console.log(chalk.greenBright.bold('Starting Minio...'));
+
+  console.log(chalk.whiteBright.bold('Creating volume:'), chalk.cyan(containerNames.minio));
+
+  try {
+    await docker.createVolume({
+      Name: containerNames.minio,
+    });
+  } catch (e) {
+    console.log(chalk.redBright.bold(`Volume ${containerNames.minio} already exists`));
+  }
+
+  console.log(chalk.whiteBright.bold('Creating container:'), chalk.cyan(containerNames.minio));
+
+  const { env } = process;
+
+  const minio = await docker.createContainer({
+    name: containerNames.minio,
+    Image: images.minio,
+    Hostname: containerNames.minio,
+    Cmd: ['server', '/data', '--address', `:${env.MINIO_PORT}`, '--console-address', `:${env.MINIO_CONSOLE_PORT}`],
+    Env: [
+      `MINIO_ROOT_USER=${env.MINIO_ROOT_USER}`,
+      `MINIO_ROOT_PASSWORD=${env.MINIO_ROOT_PASSWORD}`,
+    ],
+    HostConfig: {
+      PortBindings: {
+        [`${env.MINIO_PORT}/tcp`]: [
+          {
+            HostIp: '127.0.0.1',
+            HostPort: `${env.MINIO_PORT}/tcp`,
+          },
+        ],
+        [`${env.MINIO_PORT}/udp`]: [
+          {
+            HostIp: '127.0.0.1',
+            HostPort: `${env.MINIO_PORT}/udp`,
+          },
+        ],
+        [`${env.MINIO_CONSOLE_PORT}/tcp`]: [
+          {
+            HostIp: '127.0.0.1',
+            HostPort: `${env.MINIO_CONSOLE_PORT}/tcp`,
+          },
+        ],
+        [`${env.MINIO_CONSOLE_PORT}/udp`]: [
+          {
+            HostIp: '127.0.0.1',
+            HostPort: `${env.MINIO_CONSOLE_PORT}/udp`,
+          },
+        ],
+      },
+    },
+    ExposedPorts: {
+      [`${env.MINIO_PORT}/tcp`]: {},
+      [`${env.MINIO_PORT}/udp`]: {},
+      [`${env.MINIO_CONSOLE_PORT}/tcp`]: {},
+      [`${env.MINIO_CONSOLE_PORT}/udp`]: {}
+    },
+    RestartPolicy: {
+      Name: 'on-failure',
+    },
+    Binds: [`${containerNames.minio}:/data`],
+  });
+
+  await minio.start();
+
+  console.log(chalk.blueBright.bold('Waiting for Minio to start...'));
+
+  // Log the container logs
+  logContainer(minio, 'Minio');
+
+  // Wait for minio to start
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  console.log(chalk.greenBright.bold('Minio started ✓'));
+}
+
 async function startApp() {
   console.log(chalk.greenBright.bold('Starting Application...'));
 
@@ -306,6 +387,7 @@ async function stop() {
   console.log(chalk.redBright.bold('Stopping...'));
   await removeContainer(containerNames.postgres);
   await removeContainer(containerNames.coturn);
+  await removeContainer(containerNames.minio);
 
   console.log(chalk.redBright.bold('Stopped ✓'));
 }
@@ -329,6 +411,7 @@ await pullImages().catch(console.error);
 await stop();
 
 await startPostgres().catch(console.error);
+await startMinio().catch(console.error);
 await startCoturn().catch(console.error);
 await startApp().catch(console.error);
 
