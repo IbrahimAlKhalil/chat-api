@@ -263,7 +263,7 @@ export class HyperExModule {
     this.onlineUsers.delete(ws.uid);
     this.hyperEx.uws_instance.publish(
       '0',
-      JSON.stringify({ uid: ws.uid, type: 'out' }),
+      JSON.stringify([0, { uid: ws.uid, type: 'out' }]),
     );
   }
 
@@ -271,7 +271,7 @@ export class HyperExModule {
     this.onlineUsers.add(ws.uid);
     this.hyperEx.uws_instance.publish(
       '0',
-      JSON.stringify({ uid: ws.uid, type: 'in' }),
+      JSON.stringify([0, { uid: ws.uid, type: 'in' }]),
     );
   }
 }
