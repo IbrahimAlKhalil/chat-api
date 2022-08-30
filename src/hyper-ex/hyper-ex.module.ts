@@ -150,7 +150,7 @@ export class HyperExModule {
 
     // Authenticate the request
     try {
-      const userId = await this.authService.authenticate(token);
+      const uid = await this.authService.authenticate(token);
 
       if (aborted) {
         return;
@@ -158,14 +158,14 @@ export class HyperExModule {
 
       // Authenticated and not aborted, upgrade the connection
       res.upgrade(
-        userId,
+        { uid },
         secWebSocketKey,
         secWebSocketProtocol,
         secWebSocketExtensions,
         context,
       );
 
-      this.onlineUsers.add(userId);
+      this.onlineUsers.add(uid);
     } catch (e) {
       res
         .writeStatus('401')
