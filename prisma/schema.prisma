@@ -65,9 +65,9 @@ model messages {
 }
 
 model mime_types {
-  id         Int    @id @default(autoincrement())
-  mime_type  String @unique
-  extenstion String @unique
+  id        Int    @id @default(autoincrement())
+  mime_type String @unique
+  extension String @unique
 
   attachments attachments[]
 }
