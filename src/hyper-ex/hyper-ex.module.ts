@@ -42,7 +42,7 @@ export class HyperExModule {
   public readonly onlineUsers: Record<number, number> = {};
   private readonly logger = new Logger(HyperExModule.name);
   private readonly messageSchema = Joi.array().items(
-    Joi.string().valid('join', 'leave'),
+    Joi.string().valid('join', 'leave', 'typing', 'idle'),
     Joi.number().min(0),
   );
 
@@ -202,12 +202,27 @@ export class HyperExModule {
     }
 
     // Validate the message
-    let value: ['join' | 'leave', number];
+    let value: ['join' | 'leave' | 'typing' | 'idle', number];
 
     try {
       value = await this.messageSchema.validateAsync(msgObj);
     } catch (e) {
       return this.handleError(ws, e);
+    }
+
+    if (value[0] === 'typing' || value[0] === 'idle') {
+      const conversation = value[1].toString();
+
+      return (
+        ws.isSubscribed(conversation) &&
+        ws.publish(
+          conversation,
+          JSON.stringify({
+            type: value[0],
+            uid: ws.uid,
+          }),
+        )
+      );
     }
 
     if (value[0] === 'leave') {
