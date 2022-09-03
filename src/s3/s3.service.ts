@@ -32,7 +32,7 @@ export class S3Service extends S3 {
 
   async save(
     file: Readable,
-    messageId: number,
+    activityId: number,
     options: SaveOptions = {},
   ): Promise<attachments> {
     const fileWithMime = await fileTypeStream(file);
@@ -98,7 +98,7 @@ export class S3Service extends S3 {
 
       const attachmentData: Prisma.attachmentsUncheckedCreateInput = {
         mime_type_id: mimeType.id,
-        message_id: messageId,
+        activity_id: activityId,
       };
 
       const attachment = await trx.attachments.create({

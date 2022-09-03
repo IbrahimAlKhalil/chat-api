@@ -27,7 +27,7 @@ export class S3Controller {
     const attachment = await this.prismaService.attachments.findFirst({
       where: {
         id: req.params.id,
-        message: {
+        activity: {
           conversation: {
             members: {
               some: {
