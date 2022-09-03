@@ -43,12 +43,14 @@ model conversations {
 }
 
 model members {
-  conversation_id Int
-  user_id         Int
-  last_read       DateTime @db.Timestamptz()
-  active          Boolean  @default(true)
+  conversation_id       Int
+  user_id               Int
+  last_activity_seen_id Int?
+  active                Boolean @default(true)
 
-  conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  last_activity_seen activities?   @relation("last_activity_seen", fields: [last_activity_seen_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  conversation       conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  activities         activities[]
 
   @@id([conversation_id, user_id])
 }
@@ -56,15 +58,17 @@ model members {
 model activities {
   id              Int           @id @default(autoincrement())
   conversation_id Int
-  member_id       Int
+  user_id         Int
   activity_type   activity_type
   metadata        Json          @db.JsonB
   created_at      DateTime      @db.Timestamptz()
 
+  member       members       @relation(fields: [user_id, conversation_id], references: [user_id, conversation_id], onDelete: Cascade, onUpdate: Cascade)
   conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   attachments  attachments[]
+  members_seen members[]     @relation("last_activity_seen")
 
-  @@index([conversation_id, member_id])
+  @@index([conversation_id, user_id])
 }
 
 model mime_types {
@@ -81,7 +85,7 @@ model attachments {
   activity_id  Int
   mime_type_id Int
 
-  activity   activities @relation(fields: [activity_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  activity  activities @relation(fields: [activity_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   mime_type mime_types @relation(fields: [mime_type_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([activity_id])
