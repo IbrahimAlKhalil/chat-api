@@ -21,10 +21,7 @@ enum conversation_type {
 enum activity_type {
   file
   text
-  media
   call
-  join
-  leave
   other
 }
 
