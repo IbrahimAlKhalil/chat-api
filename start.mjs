@@ -307,44 +307,44 @@ async function startMinio() {
     name: containerNames.minio,
     Image: images.minio,
     Hostname: containerNames.minio,
-    Cmd: ['server', '/data', '--address', `:${env.MINIO_PORT}`, '--console-address', `:${env.MINIO_CONSOLE_PORT}`],
+    Cmd: ['server', '/data', '--address', `:${env.S3_PORT}`, '--console-address', `:${env.S3_CONSOLE_PORT}`],
     Env: [
-      `MINIO_ROOT_USER=${env.MINIO_ROOT_USER}`,
-      `MINIO_ROOT_PASSWORD=${env.MINIO_ROOT_PASSWORD}`,
+      `S3_ROOT_USER=${env.S3_ROOT_USER}`,
+      `S3_ROOT_PASSWORD=${env.S3_ROOT_PASSWORD}`,
     ],
     HostConfig: {
       PortBindings: {
-        [`${env.MINIO_PORT}/tcp`]: [
+        [`${env.S3_PORT}/tcp`]: [
           {
             HostIp: '127.0.0.1',
-            HostPort: `${env.MINIO_PORT}/tcp`,
+            HostPort: `${env.S3_PORT}/tcp`,
           },
         ],
-        [`${env.MINIO_PORT}/udp`]: [
+        [`${env.S3_PORT}/udp`]: [
           {
             HostIp: '127.0.0.1',
-            HostPort: `${env.MINIO_PORT}/udp`,
+            HostPort: `${env.S3_PORT}/udp`,
           },
         ],
-        [`${env.MINIO_CONSOLE_PORT}/tcp`]: [
+        [`${env.S3_CONSOLE_PORT}/tcp`]: [
           {
             HostIp: '127.0.0.1',
-            HostPort: `${env.MINIO_CONSOLE_PORT}/tcp`,
+            HostPort: `${env.S3_CONSOLE_PORT}/tcp`,
           },
         ],
-        [`${env.MINIO_CONSOLE_PORT}/udp`]: [
+        [`${env.S3_CONSOLE_PORT}/udp`]: [
           {
             HostIp: '127.0.0.1',
-            HostPort: `${env.MINIO_CONSOLE_PORT}/udp`,
+            HostPort: `${env.S3_CONSOLE_PORT}/udp`,
           },
         ],
       },
     },
     ExposedPorts: {
-      [`${env.MINIO_PORT}/tcp`]: {},
-      [`${env.MINIO_PORT}/udp`]: {},
-      [`${env.MINIO_CONSOLE_PORT}/tcp`]: {},
-      [`${env.MINIO_CONSOLE_PORT}/udp`]: {}
+      [`${env.S3_PORT}/tcp`]: {},
+      [`${env.S3_PORT}/udp`]: {},
+      [`${env.S3_CONSOLE_PORT}/tcp`]: {},
+      [`${env.S3_CONSOLE_PORT}/udp`]: {}
     },
     RestartPolicy: {
       Name: 'on-failure',
