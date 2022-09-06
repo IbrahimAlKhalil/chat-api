@@ -293,6 +293,7 @@ export class HyperExModule {
     }
 
     const count = ++this.onlineUsers[ws.uid];
+    ws.subscribe((ws.uid * -1).toString());
 
     if (count === 1) {
       this.hyperEx.uws_instance.publish(
