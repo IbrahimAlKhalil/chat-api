@@ -3,7 +3,7 @@
 generator client {
   provider        = "prisma-client-js"
   output          = "./client"
-  previewFeatures = ["interactiveTransactions", "fullTextSearch", "fullTextIndex"]
+  previewFeatures = ["interactiveTransactions", "fullTextSearch", "fullTextIndex", "fieldReference", "filteredRelationCount", "metrics", "orderByNulls", "referentialIntegrity", "tracing"]
 }
 
 datasource db {
@@ -32,7 +32,7 @@ model conversations {
   type conversation_type
 
   name       String?
-  created_at DateTime @db.Timestamptz() @default(now())
+  created_at DateTime @default(now()) @db.Timestamptz()
 
   members    members[]
   activities activities[]
