@@ -179,8 +179,11 @@ export class ConversationController {
       readSchema,
     );
 
-    const aggregateResult = await this.prismaService.conversations.aggregate({
+    const conversations = await this.prismaService.conversations.findMany({
       where: {
+        type: {
+          in: query.type,
+        },
         members:
           query.scope === 'local'
             ? {
@@ -190,34 +193,14 @@ export class ConversationController {
               }
             : undefined,
       },
-      _count: true,
-    });
-    const activities = await this.prismaService.activities.findMany({
-      where: {
-        conversation: {
-          type: {
-            in: query.type,
-          },
-        },
-        user_id: query.scope === 'local' ? uid : undefined,
-      },
-      select: {
-        id: true,
-        conversation: true,
-      },
-      distinct: ['conversation_id'],
       orderBy: {
-        created_at: 'desc',
+        last_active: 'desc',
       },
       skip: query.page === 1 ? 0 : query.limit * query.page,
       take: query.limit,
     });
 
-    res.json({
-      count: aggregateResult._count,
-      pages: Math.ceil(aggregateResult._count / query.limit),
-      data: activities.map((activity) => activity.conversation),
-    });
+    res.json(conversations);
   }
 
   async update(req: Request, res: Response) {
