@@ -81,10 +81,13 @@ export class ConversationController {
         },
       });
 
+      // Don't create new conversation if an old one can be used
       for (const member of existingMembers) {
+        // For an old conversation to be usable, at least one user must be active
         const usable = member.active || member.conversation.members[0].active;
 
         if (usable) {
+          // Found a usable conversation
           await this.prismaService.members.updateMany({
             where: {
               conversation_id: member.conversation.id,
@@ -113,6 +116,7 @@ export class ConversationController {
 
       input.members.push(uid);
     } else {
+      // It's a group conversation
       // TODO: Check permissions
     }
 
@@ -133,6 +137,7 @@ export class ConversationController {
 
     res.json(conversation);
 
+    // Let all the members of this conversation know about this
     for (const member of input.members) {
       const topic = member * -1;
       this.hyperEx.uws_instance.publish(
