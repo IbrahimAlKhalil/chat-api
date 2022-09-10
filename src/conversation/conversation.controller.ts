@@ -151,10 +151,14 @@ export class ConversationController {
     // TODO: Check permissions
 
     if (req.params.id) {
+      const id = Number(req.params.id);
+
+      if (isNaN(id)) {
+        throw new InputInvalid();
+      }
+
       const conversation = await this.prismaService.conversations.findFirst({
-        where: {
-          id: Number(req.params.id),
-        },
+        where: { id },
       });
 
       if (!conversation) {
@@ -211,6 +215,12 @@ export class ConversationController {
   }
 
   async update(req: Request, res: Response) {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      throw new InputInvalid();
+    }
+
     let input: UpdateSchema;
 
     try {
@@ -221,8 +231,8 @@ export class ConversationController {
 
     const conversation = await this.prismaService.conversations.findFirst({
       where: {
-        id: Number(req.params.id),
         type: 'group',
+        id,
       },
       select: {
         id: true,
@@ -260,10 +270,14 @@ export class ConversationController {
   }
 
   async delete(req: Request, res: Response) {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      throw new InputInvalid();
+    }
+
     const conversation = await this.prismaService.conversations.findFirst({
-      where: {
-        id: Number(req.params.id),
-      },
+      where: { id },
       select: {
         id: true,
         type: true,
