@@ -32,7 +32,10 @@ export class ConversationController {
     let input: CreateSchema;
 
     try {
-      input = await createSchema.validateAsync(await req.json());
+      input = await createSchema.validateAsync(await req.json(), {
+        stripUnknown: true,
+        convert: true,
+      });
     } catch (e) {
       throw new InputInvalid('Input validation failed', e.details);
     }
