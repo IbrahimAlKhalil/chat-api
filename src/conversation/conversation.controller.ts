@@ -325,6 +325,6 @@ export class ConversationController {
       },
     });
 
-    res.json('');
+    res.send('');
   }
 }
