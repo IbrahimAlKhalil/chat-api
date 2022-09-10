@@ -311,12 +311,17 @@ export class ConversationController {
     }
 
     // TODO: Check permissions
-    res.json(
-      await this.prismaService.conversations.delete({
-        where: {
-          id: conversation.id,
-        },
-      }),
-    );
+
+    // Deactivate everybody rather than deleting the conversation
+    await this.prismaService.members.updateMany({
+      where: {
+        conversation_id: conversation.id,
+      },
+      data: {
+        active: false,
+      },
+    });
+
+    res.json('');
   }
 }
