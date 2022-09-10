@@ -23,7 +23,8 @@ export class ConversationController {
     hyperEx.use('/conversations', router);
 
     router.post('/', this.create.bind(this));
-    router.get('/:id?', this.read.bind(this));
+    router.get('/', this.read.bind(this));
+    router.get('/:id', this.read.bind(this));
     router.put('/:id', this.update.bind(this));
     router.delete('/:id', this.delete.bind(this));
   }
@@ -155,8 +156,8 @@ export class ConversationController {
 
     // TODO: Check permissions
 
-    if (req.params.id) {
-      const id = Number(req.params.id);
+    if (req.params?.id) {
+      const id = Number(req.params?.id);
 
       if (isNaN(id)) {
         throw new InputInvalid();
