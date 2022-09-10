@@ -22,6 +22,7 @@ export class HelperService {
     try {
       query = await schema.validateAsync(req.query, {
         stripUnknown: true,
+        convert: true,
       });
     } catch (e) {
       throw new InputInvalid(e.message, e.details);
@@ -30,6 +31,7 @@ export class HelperService {
     try {
       pagination = await paginationSchema.validateAsync(req.query, {
         stripUnknown: true,
+        convert: true,
       });
     } catch (e) {
       throw new InputInvalid(e.message, e.details);
