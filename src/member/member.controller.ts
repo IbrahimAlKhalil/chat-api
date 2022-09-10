@@ -24,7 +24,8 @@ export class MemberController {
     hyperEx.use('/members', router);
 
     router.post('/:conversationId', this.create.bind(this));
-    router.get('/:conversationId/:userId?', this.read.bind(this));
+    router.get('/:conversationId', this.read.bind(this));
+    router.get('/:conversationId/:userId', this.read.bind(this));
     router.put('/:conversationId/:userId', this.update.bind(this));
     router.delete('/:conversationId/:userId', this.delete.bind(this));
   }
@@ -32,6 +33,12 @@ export class MemberController {
   private readonly MAX_MEMBERS_PER_CONVERSATION = 200;
 
   async create(req: Request, res: Response) {
+    const conversationId = Number(req.params.conversationId);
+
+    if (!conversationId) {
+      throw new InputInvalid();
+    }
+
     let input: CreateSchema;
 
     try {
@@ -47,7 +54,7 @@ export class MemberController {
 
     const conversation = await this.prismaService.conversations.findFirst({
       where: {
-        id: Number(req.params.conversationId),
+        id: conversationId,
         type: 'group',
       },
       select: {
@@ -83,12 +90,12 @@ export class MemberController {
     const member = await this.prismaService.members.upsert({
       where: {
         conversation_id_user_id: {
-          conversation_id: Number(req.params.conversationId),
+          conversation_id: conversationId,
           user_id: input.userId,
         },
       },
       create: {
-        conversation_id: Number(req.params.conversationId),
+        conversation_id: conversationId,
         user_id: input.userId,
         active: true,
       },
@@ -104,9 +111,9 @@ export class MemberController {
 
   async read(req: Request, res: Response) {
     const conversationId = Number(req.params.conversationId);
-    const memberId = Number(req.params.userId);
+    const memberId = Number(req.params?.userId);
 
-    if (isNaN(conversationId) || isNaN(memberId)) {
+    if (isNaN(conversationId) || (req.params?.userId && isNaN(memberId))) {
       throw new InputInvalid();
     }
 
@@ -115,8 +122,8 @@ export class MemberController {
     if (memberId) {
       const member = await this.prismaService.members.findFirst({
         where: {
-          conversation_id: Number(req.params.conversationId),
-          user_id: Number(req.params.user_id),
+          conversation_id: conversationId,
+          user_id: memberId,
         },
       });
 
@@ -136,7 +143,7 @@ export class MemberController {
 
     const aggregateResult = await this.prismaService.members.aggregate({
       where: {
-        conversation_id: Number(req.params.conversationId),
+        conversation_id: conversationId,
         active:
           query.type === 'active'
             ? true
@@ -148,7 +155,7 @@ export class MemberController {
     });
     const members = await this.prismaService.members.findMany({
       where: {
-        conversation_id: Number(req.params.conversationId),
+        conversation_id: conversationId,
         active:
           query.type === 'active'
             ? true
