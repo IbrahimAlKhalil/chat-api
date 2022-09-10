@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "conversations" ADD COLUMN     "last_active" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
