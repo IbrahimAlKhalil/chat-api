@@ -16,7 +16,7 @@ const Server = new HyperExpress.Server();
 const LiveAssets = new LiveDirectory({
   path: path.resolve(__dirname, './public'),
   keep: {
-    extensions: ['html', '.css', '.js', '.json', '.png', '.jpg', '.jpeg'],
+    extensions: ['html', '.css', '.js', '.json', '.png', '.jpg', '.jpeg', '.map'],
   },
   ignore: (path) => {
     return path.startsWith('.');
