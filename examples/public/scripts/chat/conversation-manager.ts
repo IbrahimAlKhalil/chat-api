@@ -126,4 +126,14 @@ export class ConversationManager {
       body: JSON.stringify({ userId: this.socket.userId }),
     }).then(res => res.json());
   }
+
+  public async leave(id: number): Promise<MemberRaw> {
+    return fetch(`${this.socket.url}/members/${id}/${this.socket.userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.socket.token}`,
+      },
+    }).then(res => res.json());
+  }
 }
