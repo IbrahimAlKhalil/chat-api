@@ -44,7 +44,7 @@ export class HyperExModule {
   private readonly logger = new Logger(HyperExModule.name);
   private readonly messageSchema = Joi.array().items(
     Joi.string().valid('join', 'leave', 'typing', 'idle'),
-    Joi.number().min(0),
+    Joi.number(),
   );
 
   private initHttp() {
