@@ -283,7 +283,7 @@ export class HyperExModule {
 
       this.hyperEx.uws_instance.publish(
         '0',
-        JSON.stringify([0, { uid: ws.uid, type: 'out' }]),
+        JSON.stringify([0, { uid: ws.uid, online: false, type: 'user' }]),
       );
     }
   }
@@ -299,7 +299,7 @@ export class HyperExModule {
     if (count === 1) {
       this.hyperEx.uws_instance.publish(
         '0',
-        JSON.stringify([0, { uid: ws.uid, type: 'in' }]),
+        JSON.stringify([0, { uid: ws.uid, online: true, type: 'user' }]),
       );
     }
   }
