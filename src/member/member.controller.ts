@@ -271,21 +271,20 @@ export class MemberController {
       throw new Unauthorized();
     }
 
-    if (uid === memberId) {
-      await this.prismaService.members.update({
-        where: {
-          conversation_id_user_id: {
-            conversation_id: conversationId,
-            user_id: memberId,
-          },
-        },
-        data: {
-          active: false,
-        },
-      });
-      return res.send('');
-    }
-
     // TODO: Check permissions
+
+    const memberUpdated = await this.prismaService.members.update({
+      where: {
+        conversation_id_user_id: {
+          conversation_id: conversationId,
+          user_id: memberId,
+        },
+      },
+      data: {
+        active: false,
+      },
+    });
+
+    return res.json(memberUpdated);
   }
 }
