@@ -1,5 +1,5 @@
-import { ReplicationEvent, Sql, SubscriptionHandle } from 'postgres';
-import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
+import { ReplicationEvent, SubscriptionHandle } from 'postgres';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { conversations } from '../../prisma/client';
 import { HyperEx } from '../hyper-ex/hyper-ex.js';
