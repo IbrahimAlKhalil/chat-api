@@ -98,19 +98,6 @@ export class ConversationController {
             },
           });
 
-          const inactiveMember = !member.active
-            ? member
-            : member.conversation.members[0];
-
-          const topic = (inactiveMember.user_id * -1).toString();
-          this.hyperEx.uws_instance.publish(
-            topic,
-            JSON.stringify([
-              topic,
-              { uid, type: 'conversation', data: member.conversation },
-            ]),
-          );
-
           return res.json(member.conversation);
         }
       }
@@ -137,18 +124,6 @@ export class ConversationController {
     });
 
     res.json(conversation);
-
-    // Let all the members of this conversation know about this
-    for (const member of input.members) {
-      const topic = member * -1;
-      this.hyperEx.uws_instance.publish(
-        topic.toString(),
-        JSON.stringify([
-          topic,
-          { uid, type: 'conversation', data: conversation },
-        ]),
-      );
-    }
   }
 
   async read(req: Request, res: Response) {
@@ -243,19 +218,6 @@ export class ConversationController {
     });
 
     res.json(conversationUpdated);
-
-    this.hyperEx.uws_instance.publish(
-      conversationUpdated.id.toString(),
-      JSON.stringify([
-        conversationUpdated.id.toString(),
-        {
-          uid,
-          type: 'conversation',
-          data: conversationUpdated,
-          action: 'update',
-        },
-      ]),
-    );
   }
 
   async delete(req: Request, res: Response) {
