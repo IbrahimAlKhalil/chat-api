@@ -169,7 +169,7 @@ export class ConversationController {
             : undefined,
       },
       orderBy: {
-        last_active: 'desc',
+        last_active_at: 'desc',
       },
       skip: query.page === 1 ? 0 : query.limit * query.page,
       take: query.limit,
