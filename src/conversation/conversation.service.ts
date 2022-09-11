@@ -20,9 +20,6 @@ export class ConversationService implements OnModuleDestroy {
       .then((sub) => {
         this.subscriptions.push(sub);
       });
-    prismaService.postgres
-      .subscribe('delete:conversations', this.handleUpdate.bind(this))
-      .then((sub) => this.subscriptions.push(sub));
   }
 
   private readonly subscriptions: SubscriptionHandle[] = [];
