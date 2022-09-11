@@ -54,11 +54,15 @@ export class ConversationManager {
   public limit = 10;
   public page = 0;
 
-  public async get<
-    T extends number | undefined = undefined,
-    R = T extends number ? ConversationRaw : ConversationRaw[]
-  >(id?: T, page = this.page, limit = this.limit): Promise<R> {
-    return fetch(`${this.socket.url}/conversations${id ? `/${id}` : `?page=${page}&limit=${limit}`}`, {
+  public get(id?: number): Promise<ConversationRaw>;
+  public get(page?: number, limit?: number, scope?: 'global' | 'local'): Promise<ConversationRaw[]>
+  public async get(...args: [number?, number?, string?]): Promise<ConversationRaw | ConversationRaw[]> {
+    const id = args.length === 1 ? args[0] : 0;
+    const page = !id ? args[0] ?? this.page : 0;
+    const limit = !id ? args[1] ?? this.limit : 0;
+    const scope = !id ? args[2] ?? 'local' : '' ;
+
+    return fetch(`${this.socket.url}/conversations${id ? `/${id}` : `?page=${page}&limit=${limit}&scope=${scope}`}`, {
       headers: {
         'Authorization': `Bearer ${this.socket.token}`,
       }
@@ -106,7 +110,7 @@ export class ConversationManager {
       throw new Error('No subscriber, call subscribe first');
     }
 
-    const conversations = await this.get(undefined, ++this.page, this.limit);
+    const conversations = await this.get(++this.page, this.limit);
 
     return this.instantiate(conversations, 'read');
   }
