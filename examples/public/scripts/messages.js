@@ -7,8 +7,6 @@ export default {
   },
   template: `
    <div class='p-4 w-[40%] max-h-screen'>
-     <h4 class='mb-2 text-2xl'>Messages: </h4>
-   
      <div class='my-1 border-2'>
        <div v-for='message in messages'>
          <b>{{ message.user.name }}:</b> {{ message.metadata }}
