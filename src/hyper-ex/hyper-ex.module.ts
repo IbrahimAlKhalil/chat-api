@@ -1,6 +1,7 @@
 import { InternalServerError } from '../exceptions/internal-server-error.js';
 import HyperExpress, { MiddlewareHandler } from 'hyper-express';
 import { BaseException } from '../exceptions/base-exception.js';
+import { InputInvalid } from '../exceptions/input-invalid.js';
 import { Unauthorized } from '../exceptions/unauthorized.js';
 import { Request, Response, Websocket } from '../types/uws';
 import { BadRequest } from '../exceptions/bad-request.js';
@@ -198,7 +199,7 @@ export class HyperExModule {
     try {
       msgObj = JSON.parse(msgTxt);
     } catch (e) {
-      return this.handleError(ws, e);
+      return this.handleError(ws, new InputInvalid(e.message, e.details));
     }
 
     // Validate the message
@@ -207,7 +208,7 @@ export class HyperExModule {
     try {
       value = await this.messageSchema.validateAsync(msgObj);
     } catch (e) {
-      return this.handleError(ws, e);
+      return this.handleError(ws, new InputInvalid(e.message, e.details));
     }
 
     if (value[0] === 'typing' || value[0] === 'idle') {
