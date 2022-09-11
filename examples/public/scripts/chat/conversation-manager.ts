@@ -3,6 +3,7 @@ import { ConversationType } from './types/conversation-type';
 import { ConversationRaw } from './types/conversation-raw';
 import { RawCudEvent } from './types/raw-cud-event';
 import { Conversation } from './conversation.js';
+import { MemberRaw } from './types/member-raw';
 import { Socket } from './socket.js';
 
 type Listener = (event: CrudEvent<Conversation>) => any;
@@ -113,5 +114,16 @@ export class ConversationManager {
     const conversations = await this.get(++this.page, this.limit);
 
     return this.instantiate(conversations, 'read');
+  }
+
+  public async join(id: number): Promise<MemberRaw> {
+    return fetch(`${this.socket.url}/members/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.socket.token}`,
+      },
+      body: JSON.stringify({ userId: this.socket.userId }),
+    }).then(res => res.json());
   }
 }

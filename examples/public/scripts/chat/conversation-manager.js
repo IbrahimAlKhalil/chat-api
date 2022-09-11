@@ -37,8 +37,12 @@ export class ConversationManager {
             delete this.conversations[event.data.id];
         }
     }
-    async get(id, page = this.page, limit = this.limit) {
-        return fetch(`${this.socket.url}/conversations${id ? `/${id}` : `?page=${page}&limit=${limit}`}`, {
+    async get(...args) {
+        const id = args.length === 1 ? args[0] : 0;
+        const page = !id ? args[0] ?? this.page : 0;
+        const limit = !id ? args[1] ?? this.limit : 0;
+        const scope = !id ? args[2] ?? 'local' : '';
+        return fetch(`${this.socket.url}/conversations${id ? `/${id}` : `?page=${page}&limit=${limit}&scope=${scope}`}`, {
             headers: {
                 'Authorization': `Bearer ${this.socket.token}`,
             }
@@ -72,8 +76,18 @@ export class ConversationManager {
         if (!this.subscribed) {
             throw new Error('No subscriber, call subscribe first');
         }
-        const conversations = await this.get(undefined, ++this.page, this.limit);
+        const conversations = await this.get(++this.page, this.limit);
         return this.instantiate(conversations, 'read');
+    }
+    async join(id) {
+        return fetch(`${this.socket.url}/members/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.socket.token}`,
+            },
+            body: JSON.stringify({ userId: this.socket.userId }),
+        }).then(res => res.json());
     }
 }
 //# sourceMappingURL=conversation-manager.js.map
