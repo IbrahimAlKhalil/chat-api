@@ -1,65 +1,65 @@
-import { ReplicationEvent, SubscriptionHandle } from 'postgres';
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { conversations } from '../../prisma/client';
 import { HyperEx } from '../hyper-ex/hyper-ex.js';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class ConversationService implements OnModuleDestroy {
+export class ConversationService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly hyperEx: HyperEx,
-  ) {
-    prismaService.postgres
-      .subscribe('insert:conversations', this.handleInsert.bind(this))
-      .then((sub) => {
-        this.subscriptions.push(sub);
-      });
-    prismaService.postgres
-      .subscribe('update:conversations', this.handleUpdate.bind(this))
-      .then((sub) => {
-        this.subscriptions.push(sub);
-      });
-  }
+  ) {}
 
-  private readonly subscriptions: SubscriptionHandle[] = [];
-
-  onModuleDestroy(): any {
-    for (const sub of this.subscriptions) {
-      sub.unsubscribe();
+  emitCreateEvent(members: number | number[], conversation: conversations) {
+    if (typeof members === 'number') {
+      members = [members];
     }
-  }
 
-  async handleInsert(data: conversations) {
-    const members = await this.prismaService.members.findMany({
-      where: {
-        conversation_id: data.id,
-        active: true,
-      },
-      select: {
-        user_id: true,
-      },
-    });
-
-    for (const member of members) {
-      const channel = member.user_id * -1;
-
+    for (const id of members) {
       this.hyperEx.uws_instance.publish(
-        channel.toString(),
+        id.toString(),
         JSON.stringify([
-          channel,
-          { type: 'conversation', action: 'create', data },
+          id,
+          {
+            type: 'conversation',
+            action: 'create',
+            data: conversation,
+          },
         ]),
       );
     }
   }
 
-  async handleUpdate(data: conversations, info: ReplicationEvent) {
+  emitDeleteEvent(members: number | number[], conversation: conversations) {
+    if (typeof members === 'number') {
+      members = [members];
+    }
+
+    for (const id of members) {
+      this.hyperEx.uws_instance.publish(
+        id.toString(),
+        JSON.stringify([
+          id,
+          {
+            type: 'conversation',
+            action: 'delete',
+            data: conversation,
+          },
+        ]),
+      );
+    }
+  }
+
+  emitUpdateEvent(conversation: conversations) {
     this.hyperEx.uws_instance.publish(
-      data.id.toString(),
+      conversation.id.toString(),
       JSON.stringify([
-        data.id,
-        { type: 'conversation', action: info.command, data },
+        conversation.id,
+        {
+          type: 'conversation',
+          action: 'update',
+          data: conversation,
+        },
       ]),
     );
   }

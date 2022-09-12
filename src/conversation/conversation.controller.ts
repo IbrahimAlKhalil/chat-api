@@ -1,5 +1,6 @@
 import { CreateSchema, createSchema } from './schema/create-schema.js';
 import { UpdateSchema, updateSchema } from './schema/update-schema.js';
+import { ConversationService } from './conversation.service.js';
 import { InputInvalid } from '../exceptions/input-invalid.js';
 import { Unauthorized } from '../exceptions/unauthorized.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -10,10 +11,12 @@ import { AuthService } from '../auth/auth.service.js';
 import { readSchema } from './schema/read-schema.js';
 import { HyperEx } from '../hyper-ex/hyper-ex.js';
 import { Injectable } from '@nestjs/common';
+import _ from 'lodash-es';
 
 @Injectable()
 export class ConversationController {
   constructor(
+    private readonly conversationService: ConversationService,
     private readonly prismaService: PrismaService,
     private readonly helperService: HelperService,
     private readonly authService: AuthService,
@@ -98,6 +101,15 @@ export class ConversationController {
             },
           });
 
+          const inactiveMember = member.active
+            ? member.conversation.members[0]
+            : member;
+
+          this.conversationService.emitCreateEvent(
+            inactiveMember.user_id,
+            member.conversation,
+          );
+
           return res.json(member.conversation);
         }
       }
@@ -122,6 +134,8 @@ export class ConversationController {
         },
       },
     });
+
+    this.conversationService.emitCreateEvent(input.members, conversation);
 
     res.json(conversation);
   }
@@ -188,7 +202,10 @@ export class ConversationController {
     let input: UpdateSchema;
 
     try {
-      input = await updateSchema.validateAsync(req.body);
+      input = await updateSchema.validateAsync(req.body, {
+        allowUnknown: false,
+        convert: true,
+      });
     } catch (e) {
       throw new InputInvalid('Input validation failed', e.details);
     }
@@ -217,6 +234,8 @@ export class ConversationController {
       data: input,
     });
 
+    this.conversationService.emitUpdateEvent(conversationUpdated);
+
     res.json(conversationUpdated);
   }
 
@@ -229,9 +248,7 @@ export class ConversationController {
 
     const conversation = await this.prismaService.conversations.findFirst({
       where: { id },
-      select: {
-        id: true,
-        type: true,
+      include: {
         members: {
           select: {
             user_id: true,
@@ -273,9 +290,15 @@ export class ConversationController {
       });
 
       // TODO: Create activity
-      // TODO: Broadcast this event to the conversation members
 
-      return res.send('');
+      const conversationCleanedUp = _.omit(conversation, 'members');
+
+      this.conversationService.emitDeleteEvent(
+        conversation.members.map((member) => member.user_id),
+        conversationCleanedUp,
+      );
+
+      return res.json(conversationCleanedUp);
     }
 
     // TODO: Check permissions
@@ -290,6 +313,13 @@ export class ConversationController {
       },
     });
 
-    res.send('');
+    const conversationCleanedUp = _.omit(conversation, 'members');
+
+    this.conversationService.emitDeleteEvent(
+      conversation.members.map((member) => member.user_id),
+      conversationCleanedUp,
+    );
+
+    res.json(conversationCleanedUp);
   }
 }
