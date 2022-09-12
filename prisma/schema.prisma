@@ -58,12 +58,15 @@ model activities {
   id              Int           @id @default(autoincrement())
   conversation_id Int
   user_id         Int
+  activity_id     Int?
   activity_type   activity_type
   metadata        Json          @db.JsonB
   created_at      DateTime      @db.Timestamptz()
 
   member       members       @relation(fields: [user_id, conversation_id], references: [user_id, conversation_id], onDelete: Cascade, onUpdate: Cascade)
   conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  activity     activities?   @relation("reply", fields: [activity_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  children     activities[]  @relation("reply")
   attachments  attachments[]
   members_seen members[]     @relation("last_activity_seen")
 
