@@ -1,14 +1,10 @@
-import { PrismaService } from '../prisma/prisma.service.js';
 import { conversations } from '../../prisma/client';
 import { HyperEx } from '../hyper-ex/hyper-ex.js';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ConversationService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly hyperEx: HyperEx,
-  ) {}
+  constructor(private readonly hyperEx: HyperEx) {}
 
   emitCreateEvent(members: number | number[], conversation: conversations) {
     if (typeof members === 'number') {
