@@ -9,6 +9,7 @@ import { BadRequest } from '../exceptions/bad-request.js';
 import { NotFound } from '../exceptions/not-found.js';
 import { AuthService } from '../auth/auth.service.js';
 import { readSchema } from './schema/read-schema.js';
+import { MemberService } from './member.service.js';
 import { HyperEx } from '../hyper-ex/hyper-ex.js';
 import { Injectable } from '@nestjs/common';
 
@@ -16,6 +17,7 @@ import { Injectable } from '@nestjs/common';
 export class MemberController {
   constructor(
     private readonly prismaService: PrismaService,
+    private readonly memberService: MemberService,
     private readonly helperService: HelperService,
     private readonly authService: AuthService,
     private readonly hyperEx: HyperEx,
@@ -105,6 +107,8 @@ export class MemberController {
     });
 
     // TODO: Create activity
+
+    this.memberService.emitEvent(conversationId, member, 'create');
 
     res.json(member);
   }
@@ -206,6 +210,7 @@ export class MemberController {
       },
       select: {
         active: true,
+        last_activity_seen_id: true,
       },
     });
     const activity = await this.prismaService.activities.findFirst({
@@ -222,8 +227,15 @@ export class MemberController {
       throw new NotFound();
     }
 
+    if (
+      member.last_activity_seen_id &&
+      member.last_activity_seen_id < input.lastActivitySeenId
+    ) {
+      throw new InputInvalid();
+    }
+
     if (uid === memberId) {
-      await this.prismaService.members.update({
+      const memberUpdated = await this.prismaService.members.update({
         where: {
           conversation_id_user_id: {
             user_id: uid,
@@ -235,11 +247,12 @@ export class MemberController {
         },
       });
 
-      return res.send('');
+      this.memberService.emitEvent(conversationId, memberUpdated, 'update');
+
+      return res.json(memberUpdated);
     }
 
     // TODO: Check permissions
-    // TODO: Broadcast this event
   }
 
   async delete(req: Request, res: Response) {
@@ -284,6 +297,8 @@ export class MemberController {
         active: false,
       },
     });
+
+    this.memberService.emitEvent(conversationId, memberUpdated, 'delete');
 
     return res.json(memberUpdated);
   }
