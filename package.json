@@ -1,7 +1,7 @@
 {
   "name": "chat-api",
   "version": "0.0.0",
-  "description": "Node.js chat API with real-time messaging, PostgreSQL storage, and P2P capabilities",
+  "description": "Node.js chat API with real-time messaging, PostgreSQL, S3, and P2P capabilities",
   "author": "Ibrahim Al Khalil",
   "private": true,
   "license": "MIT",
