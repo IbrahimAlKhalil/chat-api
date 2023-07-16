@@ -2,9 +2,9 @@
   "name": "chat-application-backend",
   "version": "0.0.0",
   "description": "",
-  "author": "Rixo Tech",
+  "author": "Ibrahim Al Khalil",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "prebuild": "rimraf dist",
