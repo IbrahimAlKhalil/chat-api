@@ -50,10 +50,6 @@ The `examples` directory contains an example application that demonstrates how t
 
 3. The example application should now be running and accessible at `http://localhost:7005`.
 
----
-
-Please make sure to create a `.env` file based on the provided `.env.example` file and update the configuration according to your environment. Feel free to customize the README.md file further based on your specific project details.
-
 ## License
 
 Chat API is open-source and released under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use, modify, and distribute the codebase as per the terms of the license.
