@@ -56,7 +56,7 @@ Please make sure to create a `.env` file based on the provided `.env.example` fi
 
 ## License
 
-The Hasura-NestJS boilerplate is open-source and released under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use, modify, and distribute the codebase as per the terms of the license.
+Chat API is open-source and released under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use, modify, and distribute the codebase as per the terms of the license.
 
 ## Contact
 
